@@ -1,0 +1,53 @@
+---
+title: "Copa"
+author: "Pedro Lira"
+date: "18 de junho de 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library()
+```
+
+
+```{r }
+games = read_csv("data/international-football.csv")
+
+jogos_brasil = games %>%
+   filter(home_team == "Brazil" | away_team == "Brazil") %>%
+   mutate(time1 = "Brazil",
+          time2 = if_else(home_team == "Brazil", away_team, home_team),
+          score1 = if_else(home_team == "Brazil", home_score, away_score),
+          score2 = if_else(home_team == "Brazil", away_score, home_score)
+   )
+
+historicos = jogos_brasil %>%
+   group_by(time2) %>%
+   summarise(
+       jogos = n(),
+       ganhou = sum(score1 > score2) / n(),
+       empatou = sum(score1 == score2) / n(),
+       perdeu = sum(score1 < score2) / n()
+       )
+```
+
+```{r}
+h = historicos %>% 
+    as.data.frame() %>% 
+    mutate_at(vars(ganhou, 
+                   jogos,
+                   perdeu,
+                   empatou), 
+              funs(scale)) %>% 
+    select(ganhou, jogos) %>%
+    dist(method = "euclidean")
+
+agrupamento_h_md = h %>% 
+    hclust(method = "ward.D")
+
+ggdendrogram(agrupamento_h_md, rotate = T)
+
+
+```
