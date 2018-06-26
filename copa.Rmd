@@ -8,7 +8,6 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
-library()
 ```
 
 
@@ -41,13 +40,18 @@ h = historicos %>%
                    perdeu,
                    empatou), 
               funs(scale)) %>% 
-    select(ganhou, jogos) %>%
+    select(ganhou, perdeu, empatou, jogos) %>%
     dist(method = "euclidean")
 
 agrupamento_h_md = h %>% 
     hclust(method = "ward.D")
 
-ggdendrogram(agrupamento_h_md, rotate = T)
+#ggdendrogram(agrupamento_h_md, rotate = T)
+```
 
+```{r}
+km <- kmeans(h, centers=4, nstart=10)
+
+autoplot(km, data = rs)
 
 ```
