@@ -30,6 +30,7 @@ historicos = jogos_brasil %>%
        empatou = sum(score1 == score2) / n(),
        perdeu = sum(score1 < score2) / n()
        )
+
 ```
 
 ```{r}
@@ -39,19 +40,14 @@ h = historicos %>%
                    jogos,
                    perdeu,
                    empatou), 
-              funs(scale)) %>% 
-    select(ganhou, perdeu, empatou, jogos) %>%
-    dist(method = "euclidean")
-
-agrupamento_h_md = h %>% 
-    hclust(method = "ward.D")
-
+              funs(scale))
+  
+km = kmeans(select(ganhou, perdeu, empatou, jogos), centers=3, nstart=10)
 #ggdendrogram(agrupamento_h_md, rotate = T)
 ```
 
 ```{r}
-km <- kmeans(h, centers=4, nstart=10)
 
-autoplot(km, data = rs)
+autoplot(h, data = historicos, frame = TRUE)
 
 ```
