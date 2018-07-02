@@ -11,11 +11,13 @@ library(tidyverse)
 library(cluster)
 library(ggplot2)
 ```
+#Os dados
 
+Já pensou ter dados de todas as partidas de futebol da FIFA? Já é realidade.
+Entretanto não queremos saber de todos os times. Queremos saber do _futuro único time hexa_ Brasil. 
 
-```{r }
+```{r warning=FALSE, echo=FALSE}
 games = read_csv("data/international-football.csv")
-
 jogos_brasil = games %>%
    filter(home_team == "Brazil" | away_team == "Brazil") %>%
    mutate(time1 = "Brazil",
@@ -24,6 +26,12 @@ jogos_brasil = games %>%
           score2 = if_else(home_team == "Brazil", away_score, home_score)
    )
 
+jogos_brasil
+```
+
+Para isso então, filtramos os jogos do Brasil e deles geramos uma tabela agrupando as vitórias, derrotas e empates para cada time.
+
+```{r}
 historicos = jogos_brasil %>%
    group_by(time2) %>%
    summarise(
@@ -33,7 +41,20 @@ historicos = jogos_brasil %>%
        perdeu = sum(score1 < score2) / n()
        )
 
+historicos
 ```
+
+Certo, essa tabela é útil mas... como vamos entender algo?
+
+### Agrupamento
+
+Queremos descobrir quais são os times:
+- Freguêses: o que o Brasil mais vence;
+- Carrascos: o que o Brasil mais perde;
+- Café-com-Leite: nem lá, nem cá - muitos empates.
+
+Para isso, queremos dividir em 3 cluster.
+Selecionamos as variáveis `perdeu`,`ganhou`,`empatou`. 
 
 ```{r}
 h = historicos %>% 
@@ -43,16 +64,15 @@ h = historicos %>%
                    perdeu,
                    empatou), 
               funs(scale)) %>%
-    select(ganhou,perdeu, empatou) %>%
+    select(ganhou,perdeu,empatou) %>%
     kmeans(3, nstart=100)
 
-#ggdendrogram(agrupamento_h_md, rotate = T)
 ```
+
+Resultando no seguinte agrupamento:
 
 ```{r}
 a <- autoplot(h, data=historicos, frame = TRUE)
-
-#a <- ggplot(historicos, aes(x=))
 
 ggplotly(a)
 ```
